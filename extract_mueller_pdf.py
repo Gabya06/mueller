@@ -1,5 +1,5 @@
 '''
-    Script to parse Mueller PDF report
+    Script to parse Mueller PDF report - uses PDFMiner
 
 '''
 
@@ -12,6 +12,11 @@ from cStringIO import StringIO
 
 
 def pdfparser(data):
+    '''
+
+    :param data: pdf file to read and extract text from
+    :return:
+    '''
     result = ''
     fp = file(data, 'rb')
     rsrcmgr = PDFResourceManager()
