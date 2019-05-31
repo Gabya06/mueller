@@ -2,7 +2,7 @@
 The goal of this project is analyze the Mueller Report.
 
 ## Data Processing and Cleaning
-Data downloaded from [CNN] (https://cdn.cnn.com/cnn/2019/images/04/18/mueller-report-searchable.pdf) as a PDF report and there were 448 pages in the report. 
+Data downloaded from [CNN](https://cdn.cnn.com/cnn/2019/images/04/18/mueller-report-searchable.pdf) as a PDF report and there were 448 pages in the report. 
 
 To get the data in a usable format, the PDF report had to be converted to text. 
 
@@ -38,7 +38,7 @@ def parsePDF(filename, page_start, page_end):
     return(text)
 ```
 
-Once the data was extracted using pdfReader in Python, data cleaning involved removing digits, punctuation and converting all words to lowercase. Words such as "the", "and", "as", "of" were also removed by using the [NLTK libary] (https://www.nltk.org) and words were converted using lemmatization. I used lemmatization over stemming because I wanted my data to include actual words and stemming sometimes can return words that arent in fact real words. 
+Once the data was extracted using pdfReader in Python, data cleaning involved removing digits, punctuation and converting all words to lowercase. Words such as "the", "and", "as", "of" were also removed by using the [NLTK libary](https://www.nltk.org) and words were converted using lemmatization. I used lemmatization over stemming because I wanted my data to include actual words and stemming sometimes can return words that arent in fact real words. 
 
 Lemmatization with Python nltk package:
 *"Lemmatization, unlike Stemming, reduces the inflected words properly ensuring that the root word belongs to the language. In Lemmatization root word is called Lemma. A lemma (plural lemmas or lemmata) is the canonical form, dictionary form, or citation form of a set of words."*
