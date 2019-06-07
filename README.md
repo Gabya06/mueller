@@ -1,5 +1,5 @@
 ## Project Overview
-The goal of this project is analyze the Mueller Report.
+The goal of this project is analyze the Mueller Report, do some visualization and Sentiment Analysis.
 
 ## Data Processing and Cleaning
 Data downloaded from [CNN](https://cdn.cnn.com/cnn/2019/images/04/18/mueller-report-searchable.pdf) as a PDF report and there were 448 pages in the report. 
