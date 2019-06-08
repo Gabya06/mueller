@@ -77,6 +77,7 @@ def get_tokens(text_string):
     return tokens
 
 
+
 if __name__ == '__main__':
     """
     Script to read Mueller PDF report and parse to text  

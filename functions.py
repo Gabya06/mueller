@@ -1,4 +1,36 @@
 
+def parsePDF(filename, page_start, page_end):
+    '''
+
+    :param filename: PDF file to extract data from
+    :param page_start: integer - start page
+    :param page_end: integer - end page
+    :return: string with text
+    '''
+    import PyPDF2
+
+    # name of PDF file to parse (creates an object)
+    pdfFileObj = open(filename,'rb')
+    # pdfReader will be parsed
+    pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+    # get start and end pages
+    if not page_start:
+        start = 1
+    else:
+        start = page_start
+    if not page_end:
+        end = pdfReader.numPages
+    else:
+        end = page_end
+
+    # go through each page and extract text to string
+    text = ''
+    for i in range(start, end):
+        print("processed page" , str(i))
+        pageObj = pdfReader.getPage(i)
+        text += pageObj.extractText()
+    return(text)
+
 
 def clean_word(word):
     '''
@@ -40,3 +72,45 @@ def stem_word(word, stemmer):
     elif stemmer == 'snowball':
         token_stem = snowball.stem(word=word)
     return token_stem
+
+
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet as wn
+from nltk.corpus import sentiwordnet as swn
+from nltk import sent_tokenize, word_tokenize, pos_tag
+
+
+def penn_to_wn(tag):
+    """
+    Function to convert from pentreebank pos tag to wordnet pos tag
+    credit: https://nlpforhackers.io/sentiment-analysis-intro/
+    :param tag: PennTreeBank tag
+    :return: WordNet tag
+    """
+
+    if tag.startswith('J'):
+        return wn.ADJ
+    elif tag.startswith('N'):
+        return wn.NOUN
+    elif tag.startswith('R'):
+        return wn.ADV
+    elif tag.startswith('V'):
+        return wn.VERB
+    return None
+
+def cleanup_text(text_string):
+    '''
+    Function to remove digits & punctuation from string (utf-8)
+    Also lower case
+    :param text_string: string to clean
+    :return: clean string
+    '''
+    import string, re
+    # since we have unicode
+    punct = dict((ord(char), None) for char in string.punctuation)
+    # clean up punctuation
+    clean_string = text_string.translate(punct)
+    # remove numbers
+    clean_string = re.sub(r'\d+', '', clean_string)
+    clean_string = clean_string.lower()
+    return clean_string
