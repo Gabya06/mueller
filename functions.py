@@ -114,3 +114,25 @@ def cleanup_text(text_string):
     clean_string = re.sub(r'\d+', '', clean_string)
     clean_string = clean_string.lower()
     return clean_string
+
+def get_tokens(text_string):
+    '''
+    Function that takes in text string and returns list of words
+    removes stop words & empty spaces & words with less then 2 characters
+
+    :param text_string: text string
+    :return: list of words
+    '''
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords as stopWords
+
+    stop_words = set(stopWords.words('English'))
+    # split words into list
+    tokens = word_tokenize(text_string)
+
+    # remove stop words
+    tokens = [word.lower() for word in tokens if word not in set(stopWords.words("English"))]
+    tokens = [word for word in tokens if word not in stop_words]
+    tokens = [word for word in tokens if word != '']
+    tokens = [word for word in tokens if len(word) > 2]
+    return tokens
