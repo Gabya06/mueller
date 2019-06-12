@@ -148,3 +148,156 @@ plt.show()
 ![wordcloud2](/images/wordcloud2.png)
 
 But... Is this a bird or a dinosaur wordcloud?
+
+## Sentiment Analysis
+
+In this section the text data that was converted from pdf to text sentences was parsed, cleaned and each word was tagged with a part of speech. Stopwords, words with fewer than 3 characters are removed so that we can focus on words with meaning in the data. 
+
+
+```python
+def get_tokens(text_string):
+    '''
+    Function that takes in text string and returns list of words
+    removes stop words & empty spaces & words with less then 2 characters
+
+    :param text_string: text string
+    :return: list of words
+    '''
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords as stopWords
+
+    stop_words = set(stopWords.words('English'))
+    # split words into list
+    tokens = word_tokenize(text_string)
+
+    # remove stop words
+    tokens = [word.lower() for word in tokens if word not in set(stopWords.words("English"))]
+    tokens = [word for word in tokens if word not in stop_words]
+    tokens = [word for word in tokens if word != '']
+    tokens = [word for word in tokens if len(word) > 2]
+    return tokens
+
+# create a list for each sentence
+sentences = sent_tokenize(text_result)
+```
+
+### Data Part of Speech Tagging and Sentiment Scoring:
+
+To find out whether a word is positive or negative, I used SentiWordNet scores from NLTK library. The SentiWordNet functionality provides a function to convert a word and part of speech tag to synsets which return a positive, negative and objective score. 
+
+A few additional steps have to be taken in order to be able calculate the sentiment score:
+
+* convert from Penn Treebank part of speech tag to WordNet part of speech tag (this is done using the penn_to_wn function)
+* lemmatize words based on tag
+* convert lemma to synsets and pick the most common synset from list (this is the 1st item)
+* finally subtract the negative score from the positive score  
+
+```python
+def get_swn_word_sentiment(token, tag):
+    """
+        Function to retrieve sentiment polarity average between negative, positive sentiment based on SentiWordNet
+        Objective sentiment is not included in sentiment score
+        Sentiment score = positive - negative score
+
+        Input: str
+        Output: float
+    """
+    senti_score = 0.0
+    lemmatizer = WordNetLemmatizer()
+    # convert to WordNet part of speech tag
+    wn_tag = penn_to_wn(tag = tag)
+    
+    # other tags arent supported by sentiword
+    if wn_tag not in (wn.NOUN, wn.ADJ, wn.ADV, wn.VERB):
+        pass
+    else:
+        lemma = lemmatizer.lemmatize(token, wn_tag)
+        
+        if not lemma:
+            pass
+        else:
+            try:
+                # convert word to synset 
+                synsets = swn.senti_synsets(lemma, pos = wn_tag)
+                if not synsets:
+                    pass
+                else:
+                    synset = synsets[0]
+                    # return positive - negative sentiment score
+                    senti_score = synset.pos_score() -  synset.neg_score()
+                    return senti_score
+            except:
+                pass
+
+```
+The input for the above function is a word and Penn Treebank tag, so the only thing remaining to do is to loop through our sentences and get part of speech for each word in each sentence and word sentiment. In the below I only keep words where the sentiment score is above 0.
+
+```python
+'''
+    loop through sentences and get sentiment score for each word
+    ignore words where sentiment = 0
+    keep track of results in 4 lists: important words, sentiment scores, part of speech tags, and sentence index position
+'''
+imp_words = []
+scores = []
+tags = []
+ids = []
+
+for ix, sentence in enumerate(sentences):
+    for word, tag in pos_tag(get_tokens(sentence)):
+        lemmatizer = WordNetLemmatizer()
+        word_sentiment = get_swn_word_sentiment(word, tag)
+        if word_sentiment > 0:
+            lemma = lemmatizer.lemmatize(word, penn_to_wn(tag))
+            print("word: {}, lemma: {}, tag: {}, sentiment: {}".format(word, lemma, tag, word_sentiment))
+            imp_words.append(lemma)
+            scores.append(word_sentiment)
+            tags.append(tag)
+            ids.append(ix)
+```
+
+When looking at words with highest Sentiment scores, it looks like most of these were correctly given positive scores. We can see words such as nice, happy and praise at the top of the list:
+
+| imp_words      | score_counts | score_mean | 
+|----------------|--------------|------------| 
+| investigator   | 44           | 1          | 
+| praise         | 2            | 1          | 
+| important      | 35           | 0.875      | 
+| happy          | 6            | 0.875      | 
+| prefer         | 2            | 0.875      | 
+| respected      | 2            | 0.875      | 
+| legendary      | 1            | 0.875      | 
+| nice           | 1            | 0.875      | 
+| reserve        | 1            | 0.875      | 
+| constitutional | 73           | 0.75       | 
+| emphasis       | 12           | 0.75       | 
+| question       | 11           | 0.75       | 
+| proper         | 7            | 0.75       | 
+| wonderful      | 5            | 0.75       | 
+| competent      | 2            | 0.75       | 
+| favorable      | 2            | 0.75       | 
+| outstanding    | 2            | 0.75       | 
+| wonder         | 2            | 0.75       | 
+| accommodate    | 1            | 0.75       | 
+| accomplished   | 1            | 0.75       | 
+
+Plotting the distribution of scores, it looks like most words are scored between 0.1 and 0.3:
+
+```python
+# plot distribution of scores 
+fig, ax = plt.subplots(figsize = (8,6))
+_ = sns.distplot(word_stats.score_mean, bins = 10, ax = ax, rug=True, hist=True, kde=False,
+             hist_kws={'color':'red','stacked':True},
+             rug_kws={'color':'blue','lw':2} )
+ax.set_title('Distribution of Average Scores\n Most scores between 0.1-0.3')
+plt.show(fig)
+```
+
+![score_dist](/images/score_dist.png)
+
+Plotting heatmaps of words with scores < 0.5:
+![heatmap_scores_2](/images/heatmap_scores_2.png)
+
+
+Plotting heatmaps of words with scores > 0.5:
+![heatmap_scores_1](/images/heatmap_scores_1.png)
