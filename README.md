@@ -1,10 +1,14 @@
+# The Redacted Mueller Report
+
+*Who has time to read through over 400 pages to find out what is in the Mueller Report? Not Me! So when I found the link to the pdf version of the report I wondered what type of stuff was in there and sought out to extract some meaning from the report. This was my motivation when starting this project.
+
 ## Project Overview
 The goal of this project is to analyze the Mueller Report with visualizations and Sentiment Analysis.
 
 ## Data Processing and Cleaning
 Data downloaded from [CNN](https://cdn.cnn.com/cnn/2019/images/04/18/mueller-report-searchable.pdf) as a PDF report and there were 448 pages in the report. 
 
-To get the data in a usable format, the PDF report had to be converted to text format. 
+To get the data in a usable format, the PDF report had to be converted to text format:
 
 ```python
 def parsePDF(filename, page_start, page_end):
@@ -38,7 +42,7 @@ def parsePDF(filename, page_start, page_end):
     return(text)
 ```
 
-Once the data was extracted using pdfReader in Python, data cleaning involved removing digits, punctuation and converting all words to lowercase. Stopwords such as "the", "and", "as", "of" were also removed by using the [NLTK libary](https://www.nltk.org) and words were returned to root form using lemmatization. I used lemmatization over stemming because I wanted the data to include actual words and stemming sometimes can return words that aren't in fact real words. 
+Once the data was extracted using pdfReader in Python, data cleaning involved removing digits, punctuation and converting all words to lowercase. Stopwords such as "the", "and", "as", "of" were also removed by using the [NLTK libary](https://www.nltk.org) and words were returned to root form using lemmatization. I used lemmatization over stemming because I wanted the data to include actual words and stemming sometimes can return words that aren't in fact real words. There are cases where stemming is helpful in data pre-processing but in my case this wouldn't have helped me understand which words were used most frequently.  
 
 Lemmatization with Python nltk package:
 *"Lemmatization, unlike Stemming, reduces the inflected words properly ensuring that the root word belongs to the language. In Lemmatization root word is called Lemma. A lemma (plural lemmas or lemmata) is the canonical form, dictionary form, or citation form of a set of words."*
@@ -74,7 +78,7 @@ def lematize_word(word):
     3) return lemma based on tag
 
     :param word: string to lemmatize
-    :return: lemma
+    :return: lemma (str)
     '''
     from nltk.stem import WordNetLemmatizer
     from nltk import pos_tag
@@ -100,13 +104,13 @@ print("top 10 words found in report", lemma_counts.most_common(20))
 
 ## Data Exploration & Visualization
 Now that the data is cleaned, we can move on to some visualization... what words appear the most?
-Not surprisignly, it looks like "president", "Russia", "Trump", "campaign" appear most frequently.
+Not surprisignly, "president", "Russia", "Trump", "campaign", "investigation" appear very frequently in the report:
 
 ![top20_barchart_2](/images/top20_barchart_2.png)
 
 ### WordClouds
 
-Creating wordclouds is quite simple, using the wordcloud library:
+A pretty neat way of visualizing words is by creating wordclouds, which is quite straightforward and simple using the wordcloud library:
 
 ```python
 # put words and frequencies in a dataframe
@@ -143,53 +147,29 @@ plt.tight_layout(pad=0)
 plt.show()
 ```
 
-
+But... Is this a bird or a dinosaur wordcloud?
 
 ![wordcloud2](/images/wordcloud2.png)
 
-But... Is this a bird or a dinosaur wordcloud?
+
 
 ## Sentiment Analysis
 
 In this section the text data that was converted from pdf to text sentences was parsed, cleaned and each word was tagged with a part of speech. Stopwords, words with fewer than 3 characters are removed so that we can focus on words with meaning in the data. 
 
 
-```python
-def get_tokens(text_string):
-    '''
-    Function that takes in text string and returns list of words
-    removes stop words & empty spaces & words with less then 2 characters
-
-    :param text_string: text string
-    :return: list of words
-    '''
-    from nltk.tokenize import word_tokenize
-    from nltk.corpus import stopwords as stopWords
-
-    stop_words = set(stopWords.words('English'))
-    # split words into list
-    tokens = word_tokenize(text_string)
-
-    # remove stop words
-    tokens = [word.lower() for word in tokens if word not in set(stopWords.words("English"))]
-    tokens = [word for word in tokens if word not in stop_words]
-    tokens = [word for word in tokens if word != '']
-    tokens = [word for word in tokens if len(word) > 2]
-    return tokens
-
-# create a list for each sentence
-sentences = sent_tokenize(text_result)
-```
-
 ### Data Part of Speech Tagging and Sentiment Scoring:
 
-To find out whether a word is positive or negative, I used SentiWordNet scores from NLTK library. The SentiWordNet functionality provides a function to convert a word and part of speech tag to synsets which return a positive, negative and objective score. 
+To find out whether a word is positive or negative, I used SentiWordNet from NLTK library to compute sentiment polarity scores. 
+*From NLTK: "SentiWordNet is a lexical resource for opinion mining and it assigns to each synset of WordNet three sentiment scores: positivity, negativity and objectivity."
+
+The SentiWordNet functionality provides the synsets function to convert a word and part of speech tag to a filter object with a positive, negative and objective score. 
 
 A few additional steps have to be taken in order to be able calculate the sentiment score:
 
 * convert from Penn Treebank part of speech tag to WordNet part of speech tag (this is done using the penn_to_wn function)
-* lemmatize words based on tag
-* convert lemma to synsets and pick the most common synset from list (this is the 1st item)
+* lemmatize words based on simple WordNet tag
+* convert lemma to synsets filter object and pick the most common synset from list (this is the 1st item)
 * finally subtract the negative score from the positive score  
 
 ```python
@@ -230,7 +210,7 @@ def get_swn_word_sentiment(token, tag):
                 pass
 
 ```
-The input for the above function is a word and Penn Treebank tag, so the only thing remaining to do is to loop through our sentences and get part of speech for each word in each sentence and word sentiment. In the below I only keep words where the sentiment score is above 0.
+The input for the above function is a word and its Penn Treebank tag, so the only thing remaining to do is to loop through our sentences and get the part of speech tag for each word in each sentence and word sentiment. In the below I only keep words where the sentiment score is above 0:
 
 ```python
 '''
@@ -238,6 +218,10 @@ The input for the above function is a word and Penn Treebank tag, so the only th
     ignore words where sentiment = 0
     keep track of results in 4 lists: important words, sentiment scores, part of speech tags, and sentence index position
 '''
+
+# create a list for each sentence
+sentences = sent_tokenize(text_result)
+
 imp_words = []
 scores = []
 tags = []
@@ -256,7 +240,7 @@ for ix, sentence in enumerate(sentences):
             ids.append(ix)
 ```
 
-When looking at words with highest Sentiment scores, it looks like most of these were correctly given positive scores. We can see words such as nice, happy and praise at the top of the list:
+Sorting the results by words with highest sentiment scores, it looks like most of these were correctly given positive scores. We can see words such as nice, happy and praise at the top of the list:
 
 | imp_words      | score_counts | score_mean | 
 |----------------|--------------|------------| 
@@ -281,7 +265,7 @@ When looking at words with highest Sentiment scores, it looks like most of these
 | accommodate    | 1            | 0.75       | 
 | accomplished   | 1            | 0.75       | 
 
-Plotting the distribution of scores, it looks like most words are scored between 0.1 and 0.3:
+Plotting the distribution of our scores, most words are negative in the report with scores between 0.1 and 0.3:
 
 ```python
 # plot distribution of scores 
