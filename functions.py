@@ -63,7 +63,6 @@ def lematize_word(word):
     3) return lemma based on tag
 
     :param word: string to lemmatize
-    :param pos: n or v (part of speech to give context on how to lematize)
     :return: lemmatized string
     '''
     from nltk.stem import WordNetLemmatizer
@@ -165,3 +164,63 @@ def get_tokens(text_string):
     tokens = [word for word in tokens if word != '']
     tokens = [word for word in tokens if len(word) > 2]
     return tokens
+
+def get_swn_sentiment(sentence):
+    """
+    Function to retrieve sentiment polarity average between negative, positive sentiment based on SentiWordNet
+    Objective sentiment is not included in total score
+    Sentiment score = positive - negative score
+    Input: str
+    Output: float
+    """
+    lemmatizer = WordNetLemmatizer()
+    for word, pos in pos_tag(word_tokenize(sentence)):
+        wn_tag = penn_to_wn(tag = pos)
+        if wn_tag not in (wn.NOUN, wn.ADJ, wn.ADV, wn.VERB):
+            continue
+        lemma = lemmatizer.lemmatize(word, wn_tag)
+        synsets = swn.senti_synsets(lemma, pos=wn_tag)
+        if not synsets:
+            continue
+        synset = synsets[0]
+        # not using avg anymore
+        # avg_sentiment = np.nanmean([synset.pos_score(), synset.neg_score()])
+        sentiment = synset.pos_score()  -  synset.neg_score()
+        return(sentiment)
+
+
+def get_swn_word_sentiment(token, tag):
+    """
+        Function to retrieve sentiment polarity average between negative, positive sentiment based on SentiWordNet
+        Objective sentiment is not included in sentiment score
+        Sentiment score = positive - negative score
+
+        Input: str
+        Output: float
+    """
+    senti_score = 0.0
+    lemmatizer = WordNetLemmatizer()
+    # convert to WordNet part of speech tag
+    wn_tag = penn_to_wn(tag=tag)
+
+    # other tags arent supported by sentiword
+    if wn_tag not in (wn.NOUN, wn.ADJ, wn.ADV, wn.VERB):
+        pass
+    else:
+        lemma = lemmatizer.lemmatize(token, wn_tag)
+
+        if not lemma:
+            pass
+        else:
+            try:
+                # convert word to synset
+                synsets = swn.senti_synsets(lemma, pos=wn_tag)
+                if not synsets:
+                    pass
+                else:
+                    synset = synsets[0]
+                    # return positive - negative sentiment score
+                    senti_score = synset.pos_score() - synset.neg_score()
+                    return senti_score
+            except:
+                pass
