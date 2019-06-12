@@ -90,7 +90,7 @@ print("top 10 words found in report", lem_v_counts.most_common(20))
 Now that the data is cleaned, we can move on to some visualization... what words appear the most?
 Not surprisignly, it looks like "president", "Russia", "Trump", "campaign" appear most frequently.
 
-![top20_barchart](/images/top20_barchart.png)
+![top20_barchart_2](/images/top20_barchart_2.png)
 
 ### WordClouds
 
