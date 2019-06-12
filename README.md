@@ -1,10 +1,10 @@
 ## Project Overview
-The goal of this project is analyze the Mueller Report, do some visualization and Sentiment Analysis.
+The goal of this project is to analyze the Mueller Report with visualizations and Sentiment Analysis.
 
 ## Data Processing and Cleaning
 Data downloaded from [CNN](https://cdn.cnn.com/cnn/2019/images/04/18/mueller-report-searchable.pdf) as a PDF report and there were 448 pages in the report. 
 
-To get the data in a usable format, the PDF report had to be converted to text. 
+To get the data in a usable format, the PDF report had to be converted to text format. 
 
 ```python
 def parsePDF(filename, page_start, page_end):
@@ -38,7 +38,7 @@ def parsePDF(filename, page_start, page_end):
     return(text)
 ```
 
-Once the data was extracted using pdfReader in Python, data cleaning involved removing digits, punctuation and converting all words to lowercase. Words such as "the", "and", "as", "of" were also removed by using the [NLTK libary](https://www.nltk.org) and words were converted using lemmatization. I used lemmatization over stemming because I wanted my data to include actual words and stemming sometimes can return words that arent in fact real words. 
+Once the data was extracted using pdfReader in Python, data cleaning involved removing digits, punctuation and converting all words to lowercase. Stopwords such as "the", "and", "as", "of" were also removed by using the [NLTK libary](https://www.nltk.org) and words were returned to root form using lemmatization. I used lemmatization over stemming because I wanted the data to include actual words and stemming sometimes can return words that aren't in fact real words. 
 
 Lemmatization with Python nltk package:
 *"Lemmatization, unlike Stemming, reduces the inflected words properly ensuring that the root word belongs to the language. In Lemmatization root word is called Lemma. A lemma (plural lemmas or lemmata) is the canonical form, dictionary form, or citation form of a set of words."*
@@ -66,24 +66,36 @@ def get_tokens(text_string):
     tokens = [word for word in tokens if len(word) > 2]
     return tokens
 
-def lematize_word(word, pos):
+def lematize_word(word):
     '''
-    Function uses WordNetLemmatizer
+    Function to return lemma for a word - uses WordNetLemmatizer
+    1) find part of speech tag (pos)
+    2) convert penn tag to wordnet tag
+    3) return lemma based on tag
+
     :param word: string to lemmatize
-    :param pos: n or v (part of speech to give context on how to lematize)
-    :return: lemmatized string
+    :return: lemma
     '''
     from nltk.stem import WordNetLemmatizer
-    wnl = WordNetLemmatizer()
-    token_lem = wnl.lemmatize(word, pos=pos)
+    from nltk import pos_tag
+    if word == '':
+        pass
+    res = pos_tag([word])
 
-    return token_lem
+    word, pos = res[0][0], res[0][1]
+    # convert to wordnet tag
+    tag = penn_to_wn(pos)
+    if tag:
+        wnl = WordNetLemmatizer()
+        token_lem = wnl.lemmatize(word, pos=tag)
+        return token_lem
+    else:
+        pass
 
-# lematize words - first for nouns then verbs
-lem_n_words = [lematize_word(x, 'n') for x in cleaned_words]
-lem_v_words = [lematize_word(x, 'v') for x in lem_n_words]
-lem_v_counts = Counter(lem_v_words)
-print("top 10 words found in report", lem_v_counts.most_common(20))
+# lematize words 
+lemmas = [lematize_word(x) for x in cleaned_words if x]
+lemma_counts = Counter(lemmas)
+print("top 10 words found in report", lemma_counts.most_common(20))
 ```
 
 ## Data Exploration & Visualization
@@ -97,9 +109,11 @@ Not surprisignly, it looks like "president", "Russia", "Trump", "campaign" appea
 Creating wordclouds is quite simple, using the wordcloud library:
 
 ```python
+# put words and frequencies in a dataframe
+df_wordcounts = pd.DataFrame(list(lemma_counts.most_common(21)), columns=['words','freq'])
 
 wordcloud = WordCloud(width = 512, height = 512, background_color='white', max_font_size=50, max_words=150)
-wordcloud = wordcloud.generate_from_frequencies(lem_v_counts)
+wordcloud = wordcloud.generate_from_frequencies(df_wordcounts.set_index('words').freq)
 plt.figure(figsize=(10,8),facecolor = 'white', edgecolor='blue')
 plt.imshow(wordcloud, interpolation="bilinear")
 plt.axis("off")
@@ -119,7 +133,7 @@ mueller_mask = np.array(Image.open("img/mask2.jpeg"))
 # change the shape of the wordcloud
 wordcloud.mask = mueller_mask
 # generate from frequencies 
-wordcloud = wordcloud.generate_from_frequencies(lem_v_counts)
+wordcloud = wordcloud.generate_from_frequencies(df_wordcounts.set_index('words').freq)
 
 # show plot
 plt.figure(figsize=(10,8),facecolor = 'white', edgecolor='blue')
