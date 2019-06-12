@@ -279,9 +279,16 @@ plt.show(fig)
 
 ![score_dist](/images/score_dist.png)
 
-Plotting heatmaps of words with scores < 0.5:
+### Heatmaps of scores
+
+Plotting a heatmap of words with scores > 0.5, we see "truth", "positive" and "happy" with colors closest to dark red implying highest sentiment scores:
+
+![heatmap_scores_1](/images/heatmap_scores_1.png)
+
+And lasty, plotting a heatmap for negative words with sentiment scores < 0.5 shows that "violent" and "waste" are quiet negative which is what I would expect.
+
+
+
 ![heatmap_scores_2](/images/heatmap_scores_2.png)
 
 
-Plotting heatmaps of words with scores > 0.5:
-![heatmap_scores_1](/images/heatmap_scores_1.png)
