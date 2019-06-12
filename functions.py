@@ -41,18 +41,47 @@ def clean_word(word):
     delete_chars = ''.join(c for c in map(chr, range(256)) if not c.isalnum())
     return word.translate(None, delete_chars)
 
-def lematize_word(word, pos):
+# def lematize_word(word, pos):
+#     '''
+#     Function uses WordNetLemmatizer
+#     :param word: string to lemmatize
+#     :param pos: n or v (part of speech to give context on how to lematize)
+#     :return: lemmatized string
+#     '''
+#     from nltk.stem import WordNetLemmatizer
+#     wnl = WordNetLemmatizer()
+#     token_lem = wnl.lemmatize(word, pos=pos)
+#
+#     return token_lem
+
+
+def lematize_word(word):
     '''
-    Function uses WordNetLemmatizer
+    Function to return lemma for a word - uses WordNetLemmatizer
+    1) find part of speech tag (pos)
+    2) convert penn pos to wordnet pos
+    3) return lemma based on tag
+
     :param word: string to lemmatize
     :param pos: n or v (part of speech to give context on how to lematize)
     :return: lemmatized string
     '''
     from nltk.stem import WordNetLemmatizer
-    wnl = WordNetLemmatizer()
-    token_lem = wnl.lemmatize(word, pos=pos)
+    from nltk import pos_tag
+    if word == '':
+        pass
+    # print("word: {}".format(word))
+    res = pos_tag([word])
 
-    return token_lem
+    word, pos = res[0][0], res[0][1]
+    # convert to wordnet tag
+    tag = penn_to_wn(pos)
+    if tag:
+        wnl = WordNetLemmatizer()
+        token_lem = wnl.lemmatize(word, pos=tag)
+        return token_lem
+    else:
+        pass
 
 def stem_word(word, stemmer):
     '''
