@@ -279,16 +279,10 @@ plt.show(fig)
 
 ![score_dist](/images/score_dist.png)
 
-### Heatmaps of scores
+### Heatmaps of Most Positive and Negative Words in Report
 
-Plotting a heatmap of words with scores > 0.5, we see "truth", "positive" and "happy" with colors closest to dark red implying highest sentiment scores:
+The most positive words are plotted on the left with 'praise', 'happy', 'pleasantry' and 'respected' scoring high above 0.7. Negative words such as 'noticed', 'presumptive','playboy', 'patriotic', and'question' have the lowest sentiment scores below 0.2:
 
-![heatmap_scores_1](/images/heatmap_scores_1.png)
-
-And lasty, plotting a heatmap for negative words with sentiment scores < 0.5 shows that "violent" and "waste" are quiet negative which is what I would expect.
-
-
-
-![heatmap_scores_2](/images/heatmap_scores_2.png)
+![score_heatmaps](/images/score_heatmaps.png)
 
 
