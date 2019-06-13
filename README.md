@@ -1,6 +1,7 @@
 # The Redacted Mueller Report
 
-*Who has time to read through over 400 pages to find out what is in the Mueller Report? Not Me! So when I found the link to the pdf version of the report I wondered what type of stuff was in there and sought out to extract some meaning from the report. This was my motivation when starting this project.
+*Who has time to read through over 400 pages to find out what is in the Mueller Report?* 
+Not Me! So when I found the link to the pdf version of the report I wondered what type of stuff was in there and sought out to extract some meaning from the report. This was my motivation when starting this project.
 
 ## Project Overview
 The goal of this project is to analyze the Mueller Report with visualizations and Sentiment Analysis.
@@ -161,7 +162,7 @@ In this section the text data that was converted from pdf to text sentences was 
 ### Data Part of Speech Tagging and Sentiment Scoring:
 
 To find out whether a word is positive or negative, I used SentiWordNet from NLTK library to compute sentiment polarity scores. 
-*From NLTK: "SentiWordNet is a lexical resource for opinion mining and it assigns to each synset of WordNet three sentiment scores: positivity, negativity and objectivity."
+*From NLTK: "SentiWordNet is a lexical resource for opinion mining and it assigns to each synset of WordNet three sentiment scores: positivity, negativity and objectivity."*
 
 The SentiWordNet functionality provides the synsets function to convert a word and part of speech tag to a filter object with a positive, negative and objective score. 
 
